@@ -1,11 +1,16 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config({ path: ".env.local" });
+
+const MONGODB_URI = process.env.MONGO_URI;
 
 let isConnected = false;
 
 export const connectDB = async () => {
     mongoose.set("strictQuery", true);
 
-    if (!process.env.MONGO_URI) {
+    if (!MONGODB_URI) {
         return console.log("MONGO_URI is not defined");
     }
 
@@ -14,7 +19,7 @@ export const connectDB = async () => {
     }
 
     try {
-        await mongoose.connect(process.env.MONGO_URI);
+        await mongoose.connect(MONGODB_URI);
 
         isConnected = true;
 

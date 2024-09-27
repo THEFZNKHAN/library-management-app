@@ -1,20 +1,20 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface ITransaction extends Document {
-    bookId: string;
-    userId: string;
+    book: Schema.Types.ObjectId;
+    user: Schema.Types.ObjectId;
     issueDate: Date;
-    returnDate: Date;
-    totalRent: number;
+    returnDate?: Date;
+    rentAmount?: number;
 }
 
-const transactionSchema: Schema = new Schema({
-    bookId: { type: Schema.Types.ObjectId, ref: "Book", required: true },
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+const TransactionSchema: Schema = new Schema({
+    book: { type: Schema.Types.ObjectId, ref: "Book", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     issueDate: { type: Date, required: true },
     returnDate: { type: Date },
-    totalRent: { type: Number },
+    rentAmount: { type: Number },
 });
 
 export default mongoose.models.Transaction ||
-    mongoose.model<ITransaction>("Transaction", transactionSchema);
+    mongoose.model<ITransaction>("Transaction", TransactionSchema);
