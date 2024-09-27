@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const BookTransactionQuery = () => {
-    const [bookName, setBookName] = useState("");
+    const [books, setBooks] = useState<{ name: string }[]>([]);
+    const [selectedBook, setSelectedBook] = useState("");
     interface TransactionResult {
         issuedPeopleCount: number;
         currentlyIssued: string | null;
@@ -19,13 +20,26 @@ const BookTransactionQuery = () => {
     const [result, setResult] = useState<TransactionResult | null>(null);
     const [error, setError] = useState("");
 
+    useEffect(() => {
+        const fetchBooks = async () => {
+            try {
+                const response = await axios.get("/api/books");
+                setBooks(response.data);
+            } catch (err) {
+                console.error("Error fetching books:", err);
+            }
+        };
+
+        fetchBooks();
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError("");
         setResult(null);
         try {
             const response = await axios.get(`/api/transactions`, {
-                params: { bookName },
+                params: { bookName: selectedBook },
             });
             setResult(response.data);
         } catch (err) {
@@ -43,14 +57,21 @@ const BookTransactionQuery = () => {
                 Book Transaction Query
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    type="text"
-                    value={bookName}
-                    onChange={(e) => setBookName(e.target.value)}
-                    placeholder="Enter book name"
+                <select
+                    value={selectedBook}
+                    onChange={(e) => setSelectedBook(e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded"
                     required
-                />
+                >
+                    <option value="" disabled>
+                        Select a book
+                    </option>
+                    {books.map((book) => (
+                        <option key={book.name} value={book.name}>
+                            {book.name}
+                        </option>
+                    ))}
+                </select>
                 <button
                     type="submit"
                     className="px-4 py-2 bg-blue-500 text-white rounded"

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 interface Book {
@@ -14,9 +14,23 @@ interface Result {
 }
 
 const UserBookHistory = () => {
-    const [userId, setUserId] = useState("");
+    const [userNames, setUserNames] = useState<{ name: string }[]>([]);
+    const [selectedUserName, setSelectedUserName] = useState("");
     const [result, setResult] = useState<Result | null>(null);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await axios.get("/api/users");
+                setUserNames(response.data);
+            } catch (err) {
+                console.error("Error fetching users:", err);
+            }
+        };
+
+        fetchUsers();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -24,7 +38,7 @@ const UserBookHistory = () => {
         setResult(null);
         try {
             const response = await axios.get(`/api/transactions`, {
-                params: { userName: userId },
+                params: { userName: selectedUserName },
             });
             setResult(response.data);
         } catch (err) {
@@ -40,14 +54,21 @@ const UserBookHistory = () => {
         <div className="p-6 bg-white text-black shadow-md rounded-lg">
             <h2 className="text-2xl font-semibold mb-4">User Book History</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    type="text"
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                    placeholder="Enter user ID or user name"
+                <select
+                    value={selectedUserName}
+                    onChange={(e) => setSelectedUserName(e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded"
                     required
-                />
+                >
+                    <option value="" disabled>
+                        Select a user
+                    </option>
+                    {userNames.map((user) => (
+                        <option key={user.name} value={user.name}>
+                            {user.name}
+                        </option>
+                    ))}
+                </select>
                 <button
                     type="submit"
                     className="px-4 py-2 bg-blue-500 text-white rounded"
