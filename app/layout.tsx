@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Header from "@/components/Header";
 import "./globals.css";
+import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -15,20 +17,28 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
     title: "Library Management System",
-    description: "A library management system",
+    description:
+        "A library management system for books, users, and transactions",
 };
 
 export default function RootLayout({
     children,
-}: Readonly<{
+    session,
+}: {
     children: React.ReactNode;
-}>) {
+    session: import("next-auth").Session;
+}) {
     return (
         <html lang="en">
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                {children}
+                <SessionProviderWrapper session={session}>
+                    <Header />
+                    <main className="container mx-auto mt-8 px-4">
+                        {children}
+                    </main>
+                </SessionProviderWrapper>
             </body>
         </html>
     );
