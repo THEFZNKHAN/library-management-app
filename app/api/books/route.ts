@@ -45,3 +45,19 @@ export async function GET(req: NextRequest) {
         );
     }
 }
+
+export async function POST(req: NextRequest) {
+    await connectDB();
+
+    try {
+        const bookData = await req.json();
+        const newBook = new Book(bookData);
+        await newBook.save();
+        return NextResponse.json(newBook, { status: 201 });
+    } catch (error) {
+        return NextResponse.json(
+            { error: `Error creating book: ${error}` },
+            { status: 500 }
+        );
+    }
+}
