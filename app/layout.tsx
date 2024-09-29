@@ -23,17 +23,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
     children,
-    session,
 }: {
     children: React.ReactNode;
-    session: import("next-auth").Session;
 }) {
     return (
         <html lang="en">
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <SessionProviderWrapper session={session}>
+                <SessionProviderWrapper session={null}>
                     <Header />
                     <main className="container mx-auto mt-8 px-4">
                         {children}
