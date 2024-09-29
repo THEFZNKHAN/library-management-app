@@ -10,17 +10,17 @@ export default function BookList({ refreshList }: { refreshList: boolean }) {
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
+        const fetchBooks = async () => {
+            try {
+                const data = await getBooks({ name: searchTerm });
+                setBooks(data);
+            } catch (error) {
+                console.error("Error fetching books:", error);
+            }
+        };
+
         fetchBooks();
     }, [searchTerm, refreshList]);
-
-    const fetchBooks = async () => {
-        try {
-            const data = await getBooks({ name: searchTerm });
-            setBooks(data);
-        } catch (error) {
-            console.error("Error fetching books:", error);
-        }
-    };
 
     return (
         <div>
