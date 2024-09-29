@@ -5,6 +5,15 @@ const api = axios.create({
     baseURL: "/api",
 });
 
+interface BookTransactionsResponse {
+    issuedPeople: Transaction[];
+    totalRent: number;
+}
+
+interface UserTransactionsResponse {
+    booksIssued: Transaction[];
+}
+
 export const getBooks = async (params?: {
     name?: string;
     category?: string;
@@ -36,31 +45,45 @@ export const returnBook = async (data: {
     userId: string;
     returnDate: string;
 }): Promise<Transaction> => {
-    const response = await api.post<Transaction>("/transactions/return", data);
+    const response = await api.post<Transaction>("/transactions", data);
     return response.data;
 };
 
 export const getBookTransactions = async (
     bookName: string
-): Promise<{
-    issuedPeople: Transaction[];
-    totalRent: number;
-}> => {
-    const response = await api.get<{
-        issuedPeople: Transaction[];
-        totalRent: number;
-    }>(`/transactions/book/${bookName}`);
-    return response.data;
+): Promise<BookTransactionsResponse | null> => {
+    try {
+        console.log(`Fetching transactions for book: ${bookName}`);
+        const response = await api.get<BookTransactionsResponse>(
+            "/transactions",
+            {
+                params: { bookName },
+            }
+        );
+
+        if (response.status !== 200) {
+            throw new Error(`API returned status ${response.status}`);
+        }
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            console.error(
+                "Axios error:",
+                error.response?.data || error.message
+            );
+        } else {
+            console.error("Unknown error:", error);
+        }
+        throw new Error("An error occurred while fetching book transactions");
+    }
 };
 
 export const getUserTransactions = async (
     userId: string
-): Promise<{
-    booksIssued: Transaction[];
-}> => {
-    const response = await api.get<{ booksIssued: Transaction[] }>(
-        `/transactions/user/${userId}`
-    );
+): Promise<UserTransactionsResponse> => {
+    const response = await api.get<UserTransactionsResponse>("/transactions", {
+        params: { userId },
+    });
     return response.data;
 };
 

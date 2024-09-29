@@ -1,46 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import Transaction, { ITransaction } from "@/models/transaction.model";
-import Book, { IBook } from "@/models/book.model";
-import User, { IUser } from "@/models/user.model";
+import Transaction from "@/models/transaction.model";
+import Book from "@/models/book.model";
+import User from "@/models/user.model";
 import mongoose from "mongoose";
 
 type TransactionInput = {
     bookName: string;
     userId: string;
-    userName?: string;
     issueDate: string;
     returnDate?: string;
 };
 
-type TransactionOutput = {
-    book: string;
-    user: string;
-    issueDate: Date;
-    returnDate?: Date;
-    rentAmount?: number;
-};
-
-const findBook = async (bookName: string): Promise<IBook | null> => {
+const findBook = async (bookName: string) => {
     return Book.findOne({ name: bookName });
 };
 
-const findUser = async (
-    userId: string | undefined,
-    userName: string | undefined
-): Promise<IUser | null> => {
-    if (userId) {
-        return User.findById(userId);
-    }
-    if (userName) {
-        return User.findOne({ name: userName });
-    }
-    return null;
+const findUser = async (userId: string) => {
+    return User.findById(userId);
 };
 
-const findActiveTransaction = async (
-    bookId: mongoose.Types.ObjectId
-): Promise<ITransaction | null> => {
+const findActiveTransaction = async (bookId: mongoose.Types.ObjectId) => {
     return Transaction.findOne({
         book: bookId,
         returnDate: null,
@@ -63,10 +43,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     try {
         const body: TransactionInput = await req.json();
-        const { bookName, userId, userName, issueDate, returnDate } = body;
+        const { bookName, userId, issueDate, returnDate } = body;
 
         const book = await findBook(bookName);
-        const user = await findUser(userId, userName);
+        const user = await findUser(userId);
 
         if (!book || !user) {
             return NextResponse.json(
@@ -75,20 +55,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        const activeTransaction = await findActiveTransaction(
-            book._id as mongoose.Types.ObjectId
-        );
+        const activeTransaction = await findActiveTransaction(book._id);
 
         if (!returnDate && activeTransaction) {
             return NextResponse.json(
                 {
-                    error: "This book is already issued to someone else. Please try again later.",
+                    error: "This book is already issued to someone else.",
                 },
                 { status: 400 }
             );
         }
 
-        let transaction: ITransaction;
+        let transaction;
 
         if (returnDate) {
             const existingTransaction = await Transaction.findOne({
@@ -122,7 +100,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             transaction = await newTransaction.save();
         }
 
-        const output: TransactionOutput = {
+        const output = {
             book: book.name,
             user: user.name,
             issueDate: transaction.issueDate,
@@ -145,14 +123,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     try {
         const { searchParams } = req.nextUrl;
-        const bookName = searchParams.get("bookName");
-        const userId = searchParams.get("userId");
-        const userName = searchParams.get("userName");
+        const bookName = searchParams.get("bookName") || "";
+        const userId = searchParams.get("userId") || "";
         const startDate = searchParams.get("startDate");
         const endDate = searchParams.get("endDate");
 
         if (bookName) {
-            const book = await findBook(bookName);
+            const book = await Book.findOne({ name: bookName });
             if (!book) {
                 return NextResponse.json(
                     { error: "Book not found" },
@@ -162,14 +139,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
             const transactions = await Transaction.find({
                 book: book._id,
-            }).populate<{ user: IUser }>("user");
-
-            const currentlyIssued = transactions.find((t) => !t.returnDate);
+            }).populate("user");
 
             const issuedPeople = transactions.map((t) => ({
                 user: t.user.name,
                 issueDate: t.issueDate,
                 returnDate: t.returnDate,
+                rentAmount: t.rentAmount,
             }));
 
             const totalRent = transactions.reduce(
@@ -180,18 +156,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             return NextResponse.json({
                 issuedPeopleCount: issuedPeople.length,
                 issuedPeople,
-                currentlyIssued: currentlyIssued
-                    ? currentlyIssued.user.name
-                    : "Not issued at the moment",
                 totalRent,
             });
         }
 
-        if (userId || userName) {
-            const user = await findUser(
-                userId || undefined,
-                userName || undefined
-            );
+        if (userId) {
+            const user = await User.findById(userId);
             if (!user) {
                 return NextResponse.json(
                     { error: "User not found" },
@@ -201,12 +171,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
             const transactions = await Transaction.find({
                 user: user._id,
-            }).populate<{ book: IBook }>("book");
+            }).populate("book");
 
             const booksIssued = transactions.map((t) => ({
                 bookName: t.book.name,
                 issueDate: t.issueDate,
                 returnDate: t.returnDate,
+                rentAmount: t.rentAmount,
             }));
 
             return NextResponse.json({ booksIssued });
@@ -218,13 +189,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
                     $gte: new Date(startDate),
                     $lte: new Date(endDate),
                 },
-            }).populate<{ book: IBook; user: IUser }>("book user");
+            }).populate("book user");
 
             const booksIssued = transactions.map((t) => ({
                 bookName: t.book.name,
                 issuedTo: t.user.name,
                 issueDate: t.issueDate,
                 returnDate: t.returnDate,
+                rentAmount: t.rentAmount,
             }));
 
             return NextResponse.json({ booksIssued });
