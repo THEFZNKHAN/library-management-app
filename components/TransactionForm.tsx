@@ -37,7 +37,7 @@ export default function TransactionForm() {
                 required
             />
             <Input
-                placeholder="User ID"
+                placeholder="User ID: 66f7110cd4e74a4b762c5753"
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
                 required
