@@ -6,6 +6,7 @@ const api = axios.create({
 });
 
 interface BookTransactionsResponse {
+    issuedPeopleCount: number;
     issuedPeople: Transaction[];
     totalRent: number;
 }

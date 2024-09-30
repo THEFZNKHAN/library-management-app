@@ -38,7 +38,7 @@ export default function TransactionList() {
             if (data) {
                 const mappedTransactions = data.issuedPeople.map(
                     (transaction: Transaction) => ({
-                        book: transaction.book.name,
+                        book: bookName,
                         user: transaction.user.name,
                         issueDate: transaction.issueDate,
                         returnDate: transaction.returnDate,
@@ -100,7 +100,7 @@ export default function TransactionList() {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 mb-4">
             <div className="flex space-x-2">
                 <Input
                     placeholder="Book Name"
