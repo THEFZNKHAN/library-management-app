@@ -67,7 +67,6 @@ export default function TransactionList() {
                     rentAmount: transaction.rentAmount,
                 })
             );
-            console.log(mappedTransactions);
             setTransactions(mappedTransactions);
         } catch (error) {
             console.error("Error fetching user transactions:", error);
