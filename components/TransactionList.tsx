@@ -21,7 +21,7 @@ interface TransactionItem {
 export default function TransactionList() {
     const [transactions, setTransactions] = useState<TransactionItem[]>([]);
     const [bookName, setBookName] = useState("");
-    const [userId, setUserId] = useState("");
+    const [userName, setUserName] = useState("");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [totalRent, setTotalRent] = useState(0);
@@ -58,11 +58,11 @@ export default function TransactionList() {
     const fetchUserTransactions = async () => {
         try {
             setError(null);
-            const data = await getUserTransactions(userId);
+            const data = await getUserTransactions(userName);
             const mappedTransactions = data.booksIssued.map(
                 (transaction: Transaction) => ({
+                    user: userName,
                     book: transaction.book.name,
-                    user: transaction.user.name,
                     issueDate: transaction.issueDate,
                     returnDate: transaction.returnDate,
                     rentAmount: transaction.rentAmount,
@@ -111,9 +111,9 @@ export default function TransactionList() {
             </div>
             <div className="flex space-x-2">
                 <Input
-                    placeholder="User ID"
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
+                    placeholder="User Name"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
                 />
                 <Button onClick={fetchUserTransactions}>Search by User</Button>
             </div>

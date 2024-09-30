@@ -124,7 +124,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         const { searchParams } = req.nextUrl;
         const bookName = searchParams.get("bookName") || "";
-        const userId = searchParams.get("userId") || "";
+        const userName = searchParams.get("userName") || "";
         const startDate = searchParams.get("startDate");
         const endDate = searchParams.get("endDate");
 
@@ -160,8 +160,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             });
         }
 
-        if (userId) {
-            const user = await User.findById(userId);
+        if (userName) {
+            const user = await User.findOne({ name: userName });
             if (!user) {
                 return NextResponse.json(
                     { error: "User not found" },
@@ -174,7 +174,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             }).populate("book");
 
             const booksIssued = transactions.map((t) => ({
-                bookName: t.book.name,
+                book: t.book.name,
                 issueDate: t.issueDate,
                 returnDate: t.returnDate,
                 rentAmount: t.rentAmount,

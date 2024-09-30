@@ -54,7 +54,6 @@ export const getBookTransactions = async (
     bookName: string
 ): Promise<BookTransactionsResponse | null> => {
     try {
-        console.log(`Fetching transactions for book: ${bookName}`);
         const response = await api.get<BookTransactionsResponse>(
             "/transactions",
             {
@@ -80,12 +79,31 @@ export const getBookTransactions = async (
 };
 
 export const getUserTransactions = async (
-    userId: string
+    userName: string
 ): Promise<UserTransactionsResponse> => {
-    const response = await api.get<UserTransactionsResponse>("/transactions", {
-        params: { userId },
-    });
-    return response.data;
+    try {
+        const response = await api.get<UserTransactionsResponse>(
+            "/transactions",
+            {
+                params: { userName },
+            }
+        );
+
+        if (response.status !== 200) {
+            throw new Error(`API returned status ${response.status}`);
+        }
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            console.error(
+                "Axios error:",
+                error.response?.data || error.message
+            );
+        } else {
+            console.error("Unknown error:", error);
+        }
+        throw new Error("An error occurred while fetching book transactions");
+    }
 };
 
 export const getTransactionsByDateRange = async (

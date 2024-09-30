@@ -54,8 +54,8 @@ This is a full-stack Library Management System built with Next.js, TypeScript, M
 
 - `POST /api/transactions`: Issue a book to a user. Requires `book name`, `user ID`, `issue date` and `return date`.
 - `GET /api/transactions?bookName=bookName`: Get the transaction history of a specific book.
-- `GET /api/transactions?userId=userId`: Get the list of books issued to a specific user.
-- `GET /api/transactions?startDate=startdat&endDate=enddate`: Get a list of books issued in a specific date range.
+- `GET /api/transactions?userName=userName`: Get the list of books issued to a specific user.
+- `GET /api/transactions?startDate=startDat&endDate=endDate`: Get a list of books issued in a specific date range.
 
 ### Helper Endpoints
 
