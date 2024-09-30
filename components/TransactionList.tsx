@@ -1,4 +1,4 @@
-"use state";
+"use client";
 
 import { useState } from "react";
 import {
@@ -45,7 +45,6 @@ export default function TransactionList() {
                         rentAmount: transaction.rentAmount,
                     })
                 );
-
                 setTransactions(mappedTransactions);
                 setTotalRent(data.totalRent);
             }
@@ -68,7 +67,7 @@ export default function TransactionList() {
                     rentAmount: transaction.rentAmount,
                 })
             );
-
+            console.log(mappedTransactions);
             setTransactions(mappedTransactions);
         } catch (error) {
             console.error("Error fetching user transactions:", error);
@@ -89,7 +88,6 @@ export default function TransactionList() {
                     rentAmount: transaction.rentAmount,
                 })
             );
-
             setTransactions(mappedTransactions);
         } catch (error) {
             console.error("Error fetching transactions by date range:", error);

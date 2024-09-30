@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 
 type TransactionInput = {
     bookName: string;
-    userId: string;
+    userName: string;
     issueDate: string;
     returnDate?: string;
 };
@@ -16,8 +16,8 @@ const findBook = async (bookName: string) => {
     return Book.findOne({ name: bookName });
 };
 
-const findUser = async (userId: string) => {
-    return User.findById(userId);
+const findUser = async (userName: string) => {
+    return User.findOne({ name: userName });
 };
 
 const findActiveTransaction = async (bookId: mongoose.Types.ObjectId) => {
@@ -43,10 +43,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     try {
         const body: TransactionInput = await req.json();
-        const { bookName, userId, issueDate, returnDate } = body;
+        const { bookName, userName, issueDate, returnDate } = body;
 
         const book = await findBook(bookName);
-        const user = await findUser(userId);
+        const user = await findUser(userName);
 
         if (!book || !user) {
             return NextResponse.json(
@@ -129,7 +129,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const endDate = searchParams.get("endDate");
 
         if (bookName) {
-            const book = await Book.findOne({ name: bookName });
+            const book = await findBook(bookName);
             if (!book) {
                 return NextResponse.json(
                     { error: "Book not found" },
@@ -142,7 +142,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             }).populate("user");
 
             const issuedPeople = transactions.map((t) => ({
-                user: t.user.name,
+                user: t.user,
                 issueDate: t.issueDate,
                 returnDate: t.returnDate,
                 rentAmount: t.rentAmount,
@@ -161,7 +161,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
 
         if (userName) {
-            const user = await User.findOne({ name: userName });
+            const user = await findUser(userName);
             if (!user) {
                 return NextResponse.json(
                     { error: "User not found" },
@@ -174,7 +174,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             }).populate("book");
 
             const booksIssued = transactions.map((t) => ({
-                book: t.book.name,
+                book: t.book,
                 issueDate: t.issueDate,
                 returnDate: t.returnDate,
                 rentAmount: t.rentAmount,
@@ -192,8 +192,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             }).populate("book user");
 
             const booksIssued = transactions.map((t) => ({
-                bookName: t.book.name,
-                issuedTo: t.user.name,
+                book: t.book,
+                user: t.user,
                 issueDate: t.issueDate,
                 returnDate: t.returnDate,
                 rentAmount: t.rentAmount,

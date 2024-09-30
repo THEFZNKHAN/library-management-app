@@ -5,7 +5,7 @@ import { issueBook, returnBook } from "@/lib/api";
 
 export default function TransactionForm() {
     const [bookName, setBookName] = useState("");
-    const [userId, setUserId] = useState("");
+    const [userName, setUserName] = useState("");
     const [date, setDate] = useState("");
     const [isIssue, setIsIssue] = useState(true);
     const [message, setMessage] = useState("");
@@ -14,13 +14,13 @@ export default function TransactionForm() {
         e.preventDefault();
         try {
             if (isIssue) {
-                await issueBook({ bookName, userId, issueDate: date });
+                await issueBook({ bookName, userName, issueDate: date });
             } else {
-                await returnBook({ bookName, userId, returnDate: date });
+                await returnBook({ bookName, userName, returnDate: date });
             }
             setMessage("Request Send Successfully!!");
             setBookName("");
-            setUserId("");
+            setUserName("");
             setDate("");
             setTimeout(() => setMessage(""), 3000);
         } catch (error) {
@@ -37,9 +37,9 @@ export default function TransactionForm() {
                 required
             />
             <Input
-                placeholder="User ID"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                placeholder="User Name"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
                 required
             />
             <Input
