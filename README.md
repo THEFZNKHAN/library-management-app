@@ -1,4 +1,4 @@
-# Library Management System
+# Library Management App
 
 This is a full-stack Library Management System built with Next.js, TypeScript, MongoDB, and Node.js. The system manages users, books, and book transactions like issuing and returning, along with rent calculations. Additionally, it provides APIs to interact with the system and optional frontend functionalities.
 
@@ -52,7 +52,7 @@ This is a full-stack Library Management System built with Next.js, TypeScript, M
 
 ### Transaction Endpoints
 
-- `POST /api/transactions`: Issue a book to a user. Requires `book name`, `user name`, `issue date` and `return date`.
+- `POST /api/transactions`: Issue a book to a user. Requires `book name`, `user name`, `issue date`, and `return date`.
 - `GET /api/transactions?bookName=bookName`: Get the transaction history of a specific book.
 - `GET /api/transactions?userName=userName`: Get the list of books issued to a specific user.
 - `GET /api/transactions?startDate=startDat&endDate=endDate`: Get a list of books issued in a specific date range.
